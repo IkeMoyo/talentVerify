@@ -1,9 +1,13 @@
 from django.contrib import admin
-from .models import Company, Employee, RoleHistory
+from .models import Company, Department, Employee, RoleHistory
 
 
 class CompanyAdmin(admin.ModelAdmin):
-    list_display = ('name', 'date_of_registration', 'registration_number', 'address', 'contact_person', 'phone', 'email')
+    list_display = ('name', 'registration_date', 'registration_number', 'address', 'contact_person', 'phone', 'email')
+
+
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ('name',)
 
 
 class EmployeeAdmin(admin.ModelAdmin):
@@ -15,5 +19,6 @@ class RoleHistoryAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Company, CompanyAdmin)
+admin.site.register(Department, DepartmentAdmin)
 admin.site.register(Employee, EmployeeAdmin)
 admin.site.register(RoleHistory, RoleHistoryAdmin)

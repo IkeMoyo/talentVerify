@@ -4,13 +4,18 @@ from io import TextIOWrapper
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
-from .models import Company, Employee, RoleHistory
-from .serializers import CompanySerializer, EmployeeSerializer, RoleHistorySerializer
+from .models import Company, Department, Employee, RoleHistory
+from .serializers import CompanySerializer, DepartmentSerializer, EmployeeSerializer, RoleHistorySerializer
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
+
+
+class DepartmentViewSet(viewsets.ModelViewSet):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentSerializer
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
