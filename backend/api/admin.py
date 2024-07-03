@@ -11,11 +11,11 @@ class DepartmentAdmin(admin.ModelAdmin):
 
 
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'employee_id', 'company', 'department')
+    list_display = ('name', 'employee_id')
 
 
 class RoleHistoryAdmin(admin.ModelAdmin):
-    list_display = ('employee', 'role', 'date_started', 'date_left', 'duties')
+    list_display = ('employee', 'company', 'department', 'role', 'date_started', 'date_left', 'duties')
 
 
 admin.site.register(Company, CompanyAdmin)

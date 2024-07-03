@@ -29,26 +29,26 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             return Response({'error': 'File not provided'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Assuming CSV file format
             decoded_file = TextIOWrapper(file, encoding='utf-8')
             reader = csv.reader(decoded_file)
-
             next(reader)  # Skip header row if exists
+
             for row in reader:
-                employee_id = row[0]
-                name = row[1]
-                department = row[2]
+                employee_id, name, department_id = row[0], row[1], row[2]
 
                 try:
                     employee = Employee.objects.get(pk=employee_id)
-                    request.data = {'name': name, 'department': department}  # Prepare data for individual update
-                    response = self.put(request, pk=employee_id)  # Call default put() method
-                    if response.status_code != status.HTTP_200_OK:
-                        return response  # Return response immediately if update fails
-                except Employee.DoesNotExist:
-                    pass  # Handle non-existing employee as needed
+                    department = Department.objects.get(pk=department_id)
 
-            return Response({'message': 'Bulk update completed'})
+                    employee.name = name
+                    employee.department = department
+                    employee.save()
+                except Employee.DoesNotExist:
+                    continue  # Skip non-existing employees
+                except Department.DoesNotExist:
+                    return Response({'error': f'Department {department_id} does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({'message': 'Bulk update completed'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -62,18 +62,16 @@ class EmployeeSearchAPIView(APIView):
         date_started = request.query_params.get('date_started')
         date_left = request.query_params.get('date_left')
 
-        # Start with all employees
         queryset = Employee.objects.all()
 
-        # Apply filters based on query parameters
         if name:
             queryset = queryset.filter(name__icontains=name)
         if company:
-            queryset = queryset.filter(company__name__icontains=company)
+            queryset = queryset.filter(rolehistory__company__name__icontains=company)
         if role:
             queryset = queryset.filter(rolehistory__role__icontains=role)
         if department:
-            queryset = queryset.filter(department__icontains=department)
+            queryset = queryset.filter(rolehistory__department__name__icontains=department)
         if date_started:
             queryset = queryset.filter(rolehistory__date_started__year=date_started)
         if date_left:
@@ -81,6 +79,7 @@ class EmployeeSearchAPIView(APIView):
                 Q(rolehistory__date_left__year=date_left) | Q(rolehistory__date_left=None)
             )
 
+        queryset = queryset.distinct()
         serializer = EmployeeSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -88,5 +87,3 @@ class EmployeeSearchAPIView(APIView):
 class RoleHistoryViewSet(viewsets.ModelViewSet):
     queryset = RoleHistory.objects.all()
     serializer_class = RoleHistorySerializer
-
-
